@@ -1,0 +1,8 @@
+api-doc.http 
+node_modules 
+package-lock.json
+.env  
+test
+local
+log.log
+.env

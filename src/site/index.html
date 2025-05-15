@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jetpath - Lightweight TypeScript Framework</title>
+
+    <link
+      rel="shortcut icon"
+      href="https://raw.githubusercontent.com/codedynasty-dev/jetpath/main/icon.png"
+      type="image/png"
+    />
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #6366f1;
+        --color-accent: #10b981;
+        --color-text-dark: #111827;
+        --color-text-light: #6b7280;
+        --color-background: #0f172a;
+        --color-background-light: #1e293b;
+        --font-family:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-family);
+        line-height: 1.6;
+        color: white;
+        background-color: var(--color-background);
+        background-image:
+          radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.3) 0, transparent 50%),
+          radial-gradient(
+            at 98% 100%,
+            rgba(99, 102, 241, 0.3) 0,
+            transparent 50%
+          );
+        min-height: 100vh;
+      }
+
+      .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 4rem 1rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 6rem;
+        position: relative;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(
+          circle,
+          rgba(59, 130, 246, 0.2) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        z-index: -1;
+      }
+
+      .hero-title {
+        font-size: 4.5rem;
+        font-weight: 900;
+        background: linear-gradient(
+          135deg,
+          var(--color-primary),
+          var(--color-secondary),
+          var(--color-accent)
+        );
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        margin-bottom: 1.5rem;
+        animation: gradient-shift 5s ease infinite;
+      }
+
+      @keyframes gradient-shift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .hero-subtitle {
+        color: var(--color-text-light);
+        font-size: 1.5rem;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.4;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+        margin-bottom: 6rem;
+      }
+
+      .feature {
+        background-color: var(--color-background-light);
+        border-radius: 1rem;
+        padding: 2.5rem;
+        text-align: center;
+        border: 1px solid rgba(59, 130, 246, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(59, 130, 246, 0.1) 0%,
+          transparent 70%
+        );
+        transform: rotate(-45deg);
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+
+      .feature:hover {
+        transform: scale(1.05);
+        border-color: rgba(59, 130, 246, 0.3);
+      }
+
+      .feature:hover::before {
+        opacity: 1;
+      }
+
+      .feature-icon {
+        width: 4.5rem;
+        height: 4.5rem;
+        margin: 0 auto 1.5rem;
+        stroke: var(--color-primary);
+        stroke-width: 1.5;
+      }
+
+      .feature-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--color-primary);
+      }
+
+      .feature-description {
+        color: var(--color-text-light);
+        font-size: 1rem;
+      }
+
+      .cta {
+        text-align: center;
+        position: relative;
+      }
+
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, gold, #ff9800);
+        color: white;
+        padding: 1.25rem 2rem;
+        text-decoration: none;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 1.125rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+      }
+
+      .cta-button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px -5px rgba(59, 130, 246, 0.4);
+      }
+
+      .cta-subtitle {
+        color: var(--color-text-light);
+        margin-top: 1.5rem;
+        font-size: 1rem;
+      }
+
+      .footer {
+        background-color: var(--color-background-light);
+        color: var(--color-text-light);
+        text-align: center;
+        padding: 2rem;
+        margin-top: 4rem;
+        border-top: 1px solid rgba(59, 130, 246, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="hero">
+        <h1 class="hero-title">Jetpath ⚡</h1>
+        <p class="hero-subtitle">
+          A lightweight, performant TypeScript framework designed for modern web
+          applications with simplicity and developer experience in mind.
+        </p>
+      </header>
+
+      <section class="features">
+        <div class="feature">
+          <svg
+            class="feature-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            ></path>
+          </svg>
+          <h3 class="feature-title">High Performance</h3>
+          <p class="feature-description">
+            Optimized for speed and efficiency, Jetpath delivers lightning-fast
+            web applications.
+          </p>
+        </div>
+        <div class="feature">
+          <svg
+            class="feature-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+            ></path>
+          </svg>
+          <h3 class="feature-title">Type Safety</h3>
+          <p class="feature-description">
+            Leverage TypeScript's powerful type system for robust and
+            predictable code.
+          </p>
+        </div>
+        <div class="feature">
+          <svg
+            class="feature-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+            ></path>
+          </svg>
+          <h3 class="feature-title">Minimal Boilerplate</h3>
+          <p class="feature-description">
+            Write clean, concise code with our intuitive framework design.
+          </p>
+        </div>
+      </section>
+
+      <section class="cta">
+        <a href="https://github.com/codedynasty-dev/jetpath" class="cta-button">
+          Star us on GitHub
+        </a>
+        <p class="cta-subtitle">
+          Star us on GitHub and join our growing community!
+        </p>
+      </section>
+    </div>
+  </body>
+</html>

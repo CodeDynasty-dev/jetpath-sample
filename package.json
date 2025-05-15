@@ -1,0 +1,31 @@
+{
+  "name": "sample",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-strip-types src/main.jet.ts",
+    "dev": "node --env-file=.env --watch --experimental-strip-types src/main.jet.ts",
+    "dev:node": "node --env-file=.env --watch --experimental-strip-types src/main.jet.ts",
+    "dev:bun": "bun --watch src/main.jet.ts",
+    "dev:deno": "deno run --watch src/main.jet.ts"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.5.0",
+    "jetpath": "^1.7.11-rc-6",
+    "mongoose": "^8.8.2",
+    "nanoid": "^5.1.5",
+    "resend": "^4.4.1",
+    "safetoken": "^2.0.2"
+  },
+  "keywords": [],
+  "author": "Friday Candour <fridaycandours@gmail.com>",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.9",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.13.1"
+  }
+}
