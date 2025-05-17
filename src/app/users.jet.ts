@@ -1,7 +1,27 @@
 import { User } from "../db/index.ts";
 import bcrypt from "bcryptjs";
-import { newAuth } from "../main.jet.ts";
-import { type JetFunc, use } from "jetpath";
+import { auth } from "../main.jet.ts";
+import { type JetFunc, type JetMiddleware, use } from "jetpath";
+
+export const MIDDLEWARE_user: JetMiddleware = async function (
+  ctx,
+): Promise<void> {
+  const cred = ctx.get("x-app-token");
+  try {
+    if (!cred) {
+      ctx.throw("Please login to continue!");
+    }
+    const accessInfo = await auth.verify(cred!);
+    const person = await User.findById(accessInfo.id);
+    if (!person) {
+      ctx.throw("Please login to continue!");
+    }
+    ctx.state.user = person;
+  } catch (error) {
+    console.error(error);
+    ctx.throw("Please login to continue!");
+  }
+};
 
 export const POST_o_user_register: JetFunc<{
   body: {
@@ -25,10 +45,10 @@ export const POST_o_user_register: JetFunc<{
     ctx.throw(400, { message: "this account exits, please login!" });
   }
   const user = await User.create({ ...data });
-  //? you can use this to send an email to the user
+  //! you can use this to send an email to the user
   //? await saveOtpAndSendEmail(data.email, "Verify your account");
   if (user) {
-    const token = await newAuth(user.id!);
+    const token = await auth.create({ id: user.id! });
     const data = { user, token };
     delete (data as any).role;
     ctx.send({ data, ok: true });
@@ -39,17 +59,18 @@ export const POST_o_user_register: JetFunc<{
 
 use(POST_o_user_register).body((t) => {
   return {
-    firstName: t.string().required(),
-    lastName: t.string(),
-    email: t.string().email().required(),
-    password: t.string().required().min(4).max(128),
+    firstName: t.string().required().default("John"),
+    lastName: t.string().default("Doe"),
+    email: t.string().email().required().default("example@example.com"),
+    password: t.string().required().min(4).max(128).default("password"),
     phone: t
       .string()
       .regex(/^\+?\d{10,15}$/)
-      .required(),
-    countryCode: t.string().default("NG"),
-    cityName: t.string().default("Abuja"),
-    currencyCode: t.string().default("NGN"),
+      .required()
+      .default("+1234567890"),
+    countryCode: t.string().default("US"),
+    cityName: t.string().default("New York"),
+    currencyCode: t.string().default("USD"),
     language: t.string().default("English"),
   };
 });

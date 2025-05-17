@@ -105,9 +105,6 @@ const productSchema = new Schema<IProduct>(
       index: true,
     },
     price: { type: Number, required: true, min: 0, index: true },
-
-    tags: { type: [String], default: [], index: true },
-
     userId: {
       // Owner of the product (usually same as shop owner)
       type: Schema.Types.ObjectId,
@@ -115,24 +112,15 @@ const productSchema = new Schema<IProduct>(
       required: true,
       index: true,
     },
-    numberInStock: { type: Number, default: 1, min: 0 }, // Total stock if no variants
-
-    shopLocation: { type: [String] },
-    isHotDeal: { type: Boolean, default: false },
   },
   { timestamps: true }, // Use both createdAt and updatedAt
 );
 
 // Text index for full-text search
-productSchema.index({ title: "text", description: "text", tags: "text" }); // Full-text search
+productSchema.index({ title: "text", description: "text" }); // Full-text search
 // Compound index for common filtering/sorting combinations
-// Compound indexes for common filter combinations
 productSchema.index({ categoryId: 1, price: 1 });
 productSchema.index({ status: 1, createdAt: -1 });
-productSchema.index({ "delivery.freeShipping": 1, price: 1 });
-productSchema.index({ shopLocation: 1, categoryId: 1 });
-productSchema.index({ shopId: 1, categoryId: 1, status: 1 });
 productSchema.index({ status: 1, price: 1 });
-productSchema.index({ shopId: 1, status: 1, createdAt: -1 }); // Shop's products by status/date
 
 export const Product = mongoose.model<IProduct>("Product", productSchema);

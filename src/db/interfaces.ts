@@ -24,7 +24,6 @@ export interface IUser extends Document {
   currencyCode?: string;
   countryCode?: string;
   cityName?: string;
-
   createdAt: Date; // Added from timestamps
   updatedAt: Date; // Added from timestamps
 }
@@ -52,25 +51,20 @@ export interface ICart extends Document {
 // --- Product (Product) Schema ---
 // Interface specifically for the Mongoose Product Document
 export interface IProduct extends Document {
+  category: string;
+  price: number;
+  brand: string;
+  attributes: Record<string, string | number>;
+  sort: "price_asc" | "price_desc" | "newest" | "popular" | "rating";
+  time: "this week" | "this month" | "this year" | "all time";
+  searchQuery: string;
   title: string;
   imageLinks: string[];
   description: string;
   details: string;
   status: "ACTIVE" | "INACTIVE" | "DRAFT" | "OUT_OF_STOCK" | "ARCHIVED";
   stars: number;
-  price: number;
   userId: mongoose.Types.ObjectId;
-  numberInStock: number; // Total stock if no variants
-  shipping: {
-    freeShipping: boolean;
-    fastShipping: boolean;
-    shipsToCountry: string;
-  };
-  brand: string;
-  attributes: Record<string, string | number>;
-  tags: string[];
-  shopLocation: string[];
-  isHotDeal: boolean;
   createdAt: Date; // Added from timestamps
   updatedAt: Date; // Added from timestamps
 }

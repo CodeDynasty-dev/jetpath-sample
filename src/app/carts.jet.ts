@@ -1,5 +1,8 @@
 import { type JetFunc, use } from "jetpath";
 import { Cart } from "../db/schema.ts";
+import { MIDDLEWARE_user } from "./users.jet.ts";
+
+export const MIDDLEWARE_cart = MIDDLEWARE_user;
 
 export const GET_cart: JetFunc = async (ctx) => {
   const cart = await Cart.findOne({ userId: ctx.state.user._id });
