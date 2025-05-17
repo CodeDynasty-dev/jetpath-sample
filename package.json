@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node --experimental-strip-types src/main.jet.ts",
-    "dev": "node --env-file=.env --watch --experimental-strip-types src/main.jet.ts",
-    "dev:node": "node --env-file=.env --watch --experimental-strip-types src/main.jet.ts",
+    "dev": "node --env-file=.env.example --watch --experimental-strip-types src/main.jet.ts",
+    "dev:node": "node --env-file=.env.example --watch --experimental-strip-types src/main.jet.ts",
     "dev:bun": "bun --watch src/main.jet.ts",
     "dev:deno": "deno run --watch src/main.jet.ts"
   },
