@@ -2,5 +2,4 @@ api-doc.http
 node_modules 
 package-lock.json
 log.log
-.env.example
 .env
