@@ -1,11 +1,7 @@
-import {
-  type JetContext,
-  type JetFunc,
-  type JetMiddleware,
-  Jetpath,
-} from "jetpath";
+import { type JetMiddleware, Jetpath, type JetRoute } from "jetpath";
 import { SafeToken } from "safetoken";
 import connectDB from "./db/index.ts";
+import { throwingPlugin } from "../plugins.ts";
 
 const app = new Jetpath({
   apiDoc: {
@@ -19,8 +15,9 @@ const app = new Jetpath({
   source: ".",
   cors: true,
   strictMode: "ON",
+  port: Number(process.env.PORT) || 3000,
 });
-
+app.derivePlugins(throwingPlugin);
 app.listen();
 connectDB();
 
@@ -39,7 +36,7 @@ export const MIDDLEWARE_: JetMiddleware = async function (ctx) {
         maxBodySize: 26 * 1024 * 1024,
       });
     } catch (error: any) {
-      ctx.throw(error.message);
+      ctx.plugins.throw(error.message);
     }
   }
 
@@ -52,6 +49,6 @@ export const MIDDLEWARE_: JetMiddleware = async function (ctx) {
   };
 };
 
-export const GET_: JetFunc<{ params: { "*": string } }> = (ctx) => {
+export const GET_: JetRoute<{ params: { "*": string } }> = (ctx) => {
   ctx.sendStream("src/site/index.html");
 };

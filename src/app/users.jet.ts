@@ -1,29 +1,29 @@
 import { User } from "../db/index.ts";
 import bcrypt from "bcryptjs";
 import { auth } from "../main.jet.ts";
-import { type JetFunc, type JetMiddleware, use } from "jetpath";
+import { type JetMiddleware, type JetRoute, use } from "jetpath";
 
 export const MIDDLEWARE_user: JetMiddleware = async function (
   ctx,
 ): Promise<void> {
-  const cred = ctx.get("x-app-token");
+  const cred = ctx.get("authorization")?.split(" ")[1];
   try {
     if (!cred) {
-      ctx.throw("Please login to continue!");
+      ctx.plugins.throw("Please login to continue!");
     }
     const accessInfo = await auth.verify(cred!);
     const person = await User.findById(accessInfo.id);
     if (!person) {
-      ctx.throw("Please login to continue!");
+      ctx.plugins.throw("Please login to continue!");
     }
     ctx.state.user = person;
   } catch (error) {
     console.error(error);
-    ctx.throw("Please login to continue!");
+    ctx.plugins.throw("Please login to continue!");
   }
 };
 
-export const POST_o_user_register: JetFunc<{
+export const POST_o_user_register: JetRoute<{
   body: {
     firstName: string;
     lastName: string;
@@ -42,7 +42,7 @@ export const POST_o_user_register: JetFunc<{
   const wasThere = await User.findOne({ email: data.email });
 
   if (wasThere) {
-    ctx.throw(400, { message: "this account exits, please login!" });
+    ctx.plugins.throw(400, { message: "this account exits, please login!" });
   }
   const user = await User.create({ ...data });
   //! you can use this to send an email to the user
@@ -53,7 +53,7 @@ export const POST_o_user_register: JetFunc<{
     delete (data as any).role;
     ctx.send({ data, ok: true });
   } else {
-    ctx.throw(400, { message: "this account exits, please login!" });
+    ctx.plugins.throw(400, { message: "this account exits, please login!" });
   }
 };
 
@@ -75,7 +75,7 @@ use(POST_o_user_register).body((t) => {
   };
 });
 
-export const GET_user: JetFunc = async function (ctx) {
+export const GET_user: JetRoute = async function (ctx) {
   const user = ctx.state.user;
   user.password = undefined;
   user.otp = undefined;
@@ -83,7 +83,7 @@ export const GET_user: JetFunc = async function (ctx) {
   ctx.send(user);
 };
 
-export const POST_user_update: JetFunc<{
+export const POST_user_update: JetRoute<{
   body: {
     name: string;
     imageLink: string;
@@ -107,7 +107,7 @@ export const POST_user_update: JetFunc<{
     await User.updateOne(userData);
     ctx.send({ data: userData, ok: true });
   } else {
-    ctx.throw(400, "wrong details, please login for verification");
+    ctx.plugins.throw(400, "wrong details, please login for verification");
   }
 };
 
@@ -123,7 +123,7 @@ use(POST_user_update).body((t) => {
   };
 });
 
-export const POST_user_update_pfp: JetFunc<{ body: { imageLink: string } }> =
+export const POST_user_update_pfp: JetRoute<{ body: { imageLink: string } }> =
   async function (ctx) {
     const user = ctx.state.user;
     const { imageLink } = ctx.body;
@@ -132,7 +132,7 @@ export const POST_user_update_pfp: JetFunc<{ body: { imageLink: string } }> =
       await User.updateOne({ _id: user._id }, { imageLink });
       ctx.send({ data: { imageLink }, ok: true });
     } else {
-      ctx.throw(400, "Invalid user or image link");
+      ctx.plugins.throw(400, "Invalid user or image link");
     }
   };
 

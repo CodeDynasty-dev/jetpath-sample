@@ -1,4 +1,4 @@
-import { type JetFunc, use } from "jetpath";
+import { type JetRoute, use } from "jetpath";
 import mongoose from "mongoose";
 import { Product } from "../db/schema.ts";
 import { type IProduct } from "../db/interfaces.ts";
@@ -6,7 +6,7 @@ import { MIDDLEWARE_user } from "./users.jet.ts";
 
 export const MIDDLEWARE_product = MIDDLEWARE_user;
 
-export const GET_products$id: JetFunc<{ params: { id: string } }> = async (
+export const GET_products$id: JetRoute<{ params: { id: string } }> = async (
   ctx,
 ) => {
   if (typeof ctx.params?.id === "string") {
@@ -14,11 +14,11 @@ export const GET_products$id: JetFunc<{ params: { id: string } }> = async (
     ctx.send({ data: product, ok: true });
     return;
   } else {
-    ctx.throw(404, "not found!");
+    ctx.plugins.throw(404, "not found!");
   }
 };
 
-export const POST_products: JetFunc<{ body: IProduct }> = async (ctx) => {
+export const POST_products: JetRoute<{ body: IProduct }> = async (ctx) => {
   const data = ctx.body;
   data.userId = ctx.state.user._id as mongoose.Types.ObjectId;
   const product = await Product.create(data);
@@ -36,14 +36,14 @@ use(POST_products).body((t) => {
   };
 });
 
-export const PUT_products$id: JetFunc<{
+export const PUT_products$id: JetRoute<{
   body: IProduct;
   params: { id: string };
 }> = async (ctx) => {
   const data = ctx.body;
   const product = await Product.findOne({ id: ctx.params.id });
   if (!product) {
-    ctx.throw(404, "Product not found!");
+    ctx.plugins.throw(404, "Product not found!");
     return;
   }
   Object.assign(product, data);
@@ -62,20 +62,20 @@ use(PUT_products$id).body((t) => {
   };
 });
 
-export const DELETE_products$id: JetFunc<{ params: { id: string } }> = async (
+export const DELETE_products$id: JetRoute<{ params: { id: string } }> = async (
   ctx,
 ) => {
   if (typeof ctx.params?.id === "string") {
     const product = await Product.findOne({ id: ctx.params.id });
     if (!product) {
-      ctx.throw(404, "Product not found!");
+      ctx.plugins.throw(404, "Product not found!");
       return;
     }
     await product.deleteOne();
     ctx.send({ ok: true });
     return;
   } else {
-    ctx.throw(404, "not found!");
+    ctx.plugins.throw(404, "not found!");
   }
 };
 
@@ -93,7 +93,7 @@ interface ProductFilters {
   page: number;
 }
 //? Advanced search filter you can let the user use to search for products
-export const GET_products_by_filters: JetFunc<{
+export const GET_products_by_filters: JetRoute<{
   query: Partial<ProductFilters>;
 }> = async (ctx) => {
   const filters = ctx.query;
@@ -200,18 +200,35 @@ export const GET_products_by_filters: JetFunc<{
   });
 };
 
-use(GET_products_by_filters).query((t) => {
-  return {
-    category: t.string(),
-    priceRange: t.object({
-      min: t.number(),
-      max: t.number(),
-    }),
-    brand: t.string(),
-    attributes: t.object({}).shape({}),
-    sort: t.string(),
-    time: t.string(),
-    searchQuery: t.string(),
-    page: t.number(),
-  };
-});
+use(GET_products_by_filters)
+  .query((t) => {
+    return {
+      category: t.string(),
+      priceRange: t.object({
+        min: t.number(),
+        max: t.number(),
+      }),
+      brand: t.string(),
+      attributes: t.object({}).shape({}),
+      sort: t.string(),
+      time: t.string(),
+      searchQuery: t.string(),
+      page: t.number(),
+    };
+  })
+  .title(
+    `
+  Filters
+
+  category: string
+  priceRange: { min: number; max: number }
+  brand: string
+  attributes: Record<string, string | number>
+  sort: "price_asc" | "price_desc" | "newest" | "popular" | "rating"
+  time: "this week" | "this month" | "this year" | "all time"
+  searchQuery: string
+  page: number
+  searchQuery
+  page
+  `,
+  );

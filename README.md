@@ -1,4 +1,4 @@
-# Jetpath: Cross-runtime Framework
+# Jetpath: Cross-runtime Framework Sample
 
 ## Modern Web Development, Simplified
 
@@ -17,7 +17,7 @@ Jetpath is a cutting-edge TypeScript framework designed for developers who deman
 
    ```typescript
    // Automatically creates a GET /user endpoint
-   export const GET_user: JetFunc = async (ctx) => {
+   export const GET_user: JetRoute = async (ctx) => {
      const user = ctx.state.user;
      ctx.send(user);
    };
@@ -27,7 +27,7 @@ Jetpath is a cutting-edge TypeScript framework designed for developers who deman
    Secure authentication with minimal configuration:
 
    ```typescript
-   export const POST_o_user_login: JetFunc<{
+   export const POST_o_user_login: JetRoute<{
      body: { password: string; email: string };
    }> = async (ctx) => {
      // Type-safe authentication & Documented automatically
@@ -44,7 +44,7 @@ Jetpath is a cutting-edge TypeScript framework designed for developers who deman
    Easily define and manage api endpoints:
 
    ```typescript
-   export const GET_products: JetFunc = async (ctx) => {
+   export const GET_products: JetRoute = async (ctx) => {
      const products = await Product.find();
      ctx.send(products);
    };

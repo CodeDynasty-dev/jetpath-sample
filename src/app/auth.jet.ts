@@ -1,20 +1,20 @@
-import { type JetFunc, use } from "jetpath";
+import { type JetRoute, use } from "jetpath";
 import bcrypt from "bcryptjs";
 import { User } from "../db/schema.ts";
 import { auth } from "../main.jet.ts";
 
 const client_redirect = process.env.client_redirect;
 
-export const POST_auth_user_login: JetFunc<{
+export const POST_auth_user_login: JetRoute<{
   body: { password: string; email: string };
 }> = async function (ctx) {
   ctx.body!.email = ctx.body?.email.toLowerCase();
   const person = await User.findOne({ email: ctx.body.email });
   if (!person) {
-    ctx.throw({ ok: false, message: "Incorrect email" });
+    ctx.plugins.throw({ ok: false, message: "Incorrect email" });
   } else {
     if (!(await bcrypt.compare(ctx.body?.password, person.password!))) {
-      ctx.throw({ ok: false, message: "Incorrect password" });
+      ctx.plugins.throw({ ok: false, message: "Incorrect password" });
     }
     const token = await auth.create({ id: person.id! });
     delete person.otp;
@@ -47,12 +47,12 @@ const gurl =
   `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=profile email`;
 
 // Initiates the Google Login flow
-export const GET_auth_google_auth: JetFunc = (ctx) => {
+export const GET_auth_google_auth: JetRoute = (ctx) => {
   ctx.redirect(gurl);
 };
 
 // Callback URL for handling the Google Login response
-export const GET_auth_google_auth_callback: JetFunc<{
+export const GET_auth_google_auth_callback: JetRoute<{
   query: { code: string };
 }> = async (ctx) => {
   const { code } = ctx.query;
@@ -85,7 +85,7 @@ export const GET_auth_google_auth_callback: JetFunc<{
         const { email, name, given_name, picture } = profile;
         let user = await User.findOne({ email });
         if (!user) {
-          ctx.throw(400, "User not found");
+          ctx.plugins.throw(400, "User not found");
           return;
         }
         // ? register
@@ -94,7 +94,7 @@ export const GET_auth_google_auth_callback: JetFunc<{
         ctx.redirect(client_redirect + "/login?ok=true&token=" + token);
       }
     } else {
-      ctx.throw(400, "Invalid code");
+      ctx.plugins.throw(400, "Invalid code");
     }
   } catch (error) {
     console.error("Error:", error);
