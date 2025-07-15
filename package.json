@@ -12,11 +12,11 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "dotenv": "^16.5.0",
-    "jetpath": "^1.8.8",
-    "mongoose": "^8.8.2",
+    "dotenv": "^16.6.1",
+    "jetpath": "^1.9.3",
+    "mongoose": "^8.16.3",
     "nanoid": "^5.1.5",
-    "resend": "^4.4.1",
+    "resend": "^4.6.0",
     "safetoken": "^2.0.2"
   },
   "keywords": [],
@@ -26,6 +26,6 @@
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.9",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^22.13.1"
+    "@types/node": "^22.16.4"
   }
 }

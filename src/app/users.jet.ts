@@ -4,7 +4,7 @@ import { auth } from "../main.jet.ts";
 import { type JetMiddleware, type JetRoute, use } from "jetpath";
 
 export const MIDDLEWARE_user: JetMiddleware = async function (
-  ctx,
+  ctx
 ): Promise<void> {
   const cred = ctx.get("authorization")?.split(" ")[1];
   try {
@@ -36,7 +36,7 @@ export const POST_o_user_register: JetRoute<{
     language: string;
   };
 }> = async function (ctx) {
-  const data = ctx.body;
+  const data = await ctx.parse();
   data.email = data.email.toLowerCase();
   data.password = await bcrypt.hash(data.password, 10);
   const wasThere = await User.findOne({ email: data.email });
@@ -85,6 +85,10 @@ export const GET_user: JetRoute = async function (ctx) {
 
 export const POST_user_update: JetRoute<{
   body: {
+    email: any;
+    password: any;
+    otp: any;
+    tempTokenExpiredAt: any;
     name: string;
     imageLink: string;
     phoneNumber: string;
@@ -95,16 +99,13 @@ export const POST_user_update: JetRoute<{
     howDidYouHearAboutUs: string;
   };
 }> = async function (ctx) {
-  const userData = {
-    ...ctx.state.user,
-    ...ctx.body,
-  };
+  const userData = await ctx.parse();
   if (userData) {
     delete userData.email;
     delete userData.password;
     delete userData.otp;
     delete userData.tempTokenExpiredAt;
-    await User.updateOne(userData);
+    await User.updateOne({ _id: ctx.state.user._id }, userData);
     ctx.send({ data: userData, ok: true });
   } else {
     ctx.plugins.throw(400, "wrong details, please login for verification");
@@ -125,8 +126,8 @@ use(POST_user_update).body((t) => {
 
 export const POST_user_update_pfp: JetRoute<{ body: { imageLink: string } }> =
   async function (ctx) {
-    const user = ctx.state.user;
-    const { imageLink } = ctx.body;
+    const user = await ctx.state.user;
+    const { imageLink } = await ctx.parse();
 
     if (user && imageLink) {
       await User.updateOne({ _id: user._id }, { imageLink });

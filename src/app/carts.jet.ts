@@ -10,7 +10,7 @@ export const GET_cart: JetRoute = async (ctx) => {
 };
 
 export const POST_cart: JetRoute = async (ctx) => {
-  const data = ctx.body;
+  const data = await ctx.parse();
   const cart = await Cart.findOne({ userId: ctx.state.user._id });
   if (cart) {
     ctx.send({ data: cart, ok: true });
@@ -30,7 +30,7 @@ use(POST_cart).body((t) => {
 });
 
 export const PUT_cart: JetRoute = async (ctx) => {
-  const data = ctx.body;
+  const data = await ctx.parse();
   const cart = await Cart.findOne({ userId: ctx.state.user._id });
   if (!cart) {
     ctx.plugins.throw(404, "Cart not found!");

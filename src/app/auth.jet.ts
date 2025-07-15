@@ -8,12 +8,12 @@ const client_redirect = process.env.client_redirect;
 export const POST_auth_user_login: JetRoute<{
   body: { password: string; email: string };
 }> = async function (ctx) {
-  ctx.body!.email = ctx.body?.email.toLowerCase();
-  const person = await User.findOne({ email: ctx.body.email });
+  const { email, password } = await ctx.parse();
+  const person = await User.findOne({ email: email.toLowerCase() });
   if (!person) {
     ctx.plugins.throw({ ok: false, message: "Incorrect email" });
   } else {
-    if (!(await bcrypt.compare(ctx.body?.password, person.password!))) {
+    if (!(await bcrypt.compare(password, person.password!))) {
       ctx.plugins.throw({ ok: false, message: "Incorrect password" });
     }
     const token = await auth.create({ id: person.id! });
@@ -43,8 +43,7 @@ use(POST_auth_user_login).body((t) => ({
 const CLIENT_ID = process.env.client_id;
 const CLIENT_SECRET = process.env.client_secret;
 const REDIRECT_URI = process.env.host + "/auth/google/auth/callback";
-const gurl =
-  `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=profile email`;
+const gurl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=profile email`;
 
 // Initiates the Google Login flow
 export const GET_auth_google_auth: JetRoute = (ctx) => {
@@ -55,7 +54,7 @@ export const GET_auth_google_auth: JetRoute = (ctx) => {
 export const GET_auth_google_auth_callback: JetRoute<{
   query: { code: string };
 }> = async (ctx) => {
-  const { code } = ctx.query;
+  const { code } = await ctx.parseQuery();
 
   try {
     // Exchange authorization code for access token
@@ -77,7 +76,7 @@ export const GET_auth_google_auth_callback: JetRoute<{
         "https://www.googleapis.com/oauth2/v1/userinfo",
         {
           headers: { Authorization: `Bearer ${access_token}` },
-        },
+        }
       );
       if (access_res.ok) {
         const profile = await access_res.json();

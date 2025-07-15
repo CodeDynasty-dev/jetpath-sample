@@ -7,7 +7,7 @@ import { MIDDLEWARE_user } from "./users.jet.ts";
 export const MIDDLEWARE_product = MIDDLEWARE_user;
 
 export const GET_products$id: JetRoute<{ params: { id: string } }> = async (
-  ctx,
+  ctx
 ) => {
   if (typeof ctx.params?.id === "string") {
     const product = await Product.findOne({ id: ctx.params.id });
@@ -19,7 +19,7 @@ export const GET_products$id: JetRoute<{ params: { id: string } }> = async (
 };
 
 export const POST_products: JetRoute<{ body: IProduct }> = async (ctx) => {
-  const data = ctx.body;
+  const data = await ctx.parse();
   data.userId = ctx.state.user._id as mongoose.Types.ObjectId;
   const product = await Product.create(data);
   ctx.send({ data: product, ok: true });
@@ -40,7 +40,7 @@ export const PUT_products$id: JetRoute<{
   body: IProduct;
   params: { id: string };
 }> = async (ctx) => {
-  const data = ctx.body;
+  const data = await ctx.parse();
   const product = await Product.findOne({ id: ctx.params.id });
   if (!product) {
     ctx.plugins.throw(404, "Product not found!");
@@ -63,7 +63,7 @@ use(PUT_products$id).body((t) => {
 });
 
 export const DELETE_products$id: JetRoute<{ params: { id: string } }> = async (
-  ctx,
+  ctx
 ) => {
   if (typeof ctx.params?.id === "string") {
     const product = await Product.findOne({ id: ctx.params.id });
@@ -96,7 +96,7 @@ interface ProductFilters {
 export const GET_products_by_filters: JetRoute<{
   query: Partial<ProductFilters>;
 }> = async (ctx) => {
-  const filters = ctx.query;
+  const filters = await ctx.parseQuery();
   const query: any = {};
   const andConditions = [];
 
@@ -180,7 +180,7 @@ export const GET_products_by_filters: JetRoute<{
   }
 
   // Execute query with pagination (example: 50 items per page)
-  const page = parseInt(ctx.query.page as any) || 1;
+  const page = parseInt((await ctx.parseQuery()).page as any) || 1;
   const limit = 50;
   const skip = (page - 1) * limit;
 
@@ -230,5 +230,5 @@ use(GET_products_by_filters)
   page: number
   searchQuery
   page
-  `,
+  `
   );
