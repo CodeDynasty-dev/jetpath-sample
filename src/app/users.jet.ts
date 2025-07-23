@@ -1,7 +1,10 @@
 import { User } from "../db/index.ts";
 import bcrypt from "bcryptjs";
 import { auth } from "../main.jet.ts";
-import { type JetMiddleware, type JetRoute, use } from "jetpath";
+import { type JetFile, type JetMiddleware, type JetRoute, use } from "jetpath";
+import { cwd } from "process";
+import { writeFile } from "fs/promises";
+import { relative } from "path";
 
 export const MIDDLEWARE_user: JetMiddleware = async function (
   ctx
@@ -23,7 +26,7 @@ export const MIDDLEWARE_user: JetMiddleware = async function (
   }
 };
 
-export const POST_o_user_register: JetRoute<{
+export const POST_auth_register: JetRoute<{
   body: {
     firstName: string;
     lastName: string;
@@ -57,7 +60,7 @@ export const POST_o_user_register: JetRoute<{
   }
 };
 
-use(POST_o_user_register).body((t) => {
+use(POST_auth_register).body((t) => {
   return {
     firstName: t.string().required().default("John"),
     lastName: t.string().default("Doe"),
@@ -124,14 +127,31 @@ use(POST_user_update).body((t) => {
   };
 });
 
-export const POST_user_update_pfp: JetRoute<{ body: { imageLink: string } }> =
+export const POST_user_update_pfp: JetRoute<{ body: { imageLink: JetFile } }> =
   async function (ctx) {
     const user = await ctx.state.user;
     const { imageLink } = await ctx.parse();
 
     if (user && imageLink) {
-      await User.updateOne({ _id: user._id }, { imageLink });
-      ctx.send({ data: { imageLink }, ok: true });
+      try {
+        //? generate link
+        const path = relative(
+          cwd(),
+          cwd() + "/src/site/" + Date.now() + "_" + imageLink.fileName
+        );
+        const link =
+          "http://localhost:3000" + path.replace("src/site", "/uploads");
+        console.log({ link, path });
+        // ? save image
+        await writeFile(path, imageLink.content);
+        // ? update user
+        await User.updateOne({ _id: user._id }, { imageLink: link });
+        // ? send response
+        ctx.send({ data: { imageLink: link }, ok: true });
+      } catch (error) {
+        console.error(error);
+        throw new Error("Invalid user or image link");
+      }
     } else {
       ctx.plugins.throw(400, "Invalid user or image link");
     }
@@ -139,6 +159,6 @@ export const POST_user_update_pfp: JetRoute<{ body: { imageLink: string } }> =
 
 use(POST_user_update_pfp).body((t) => {
   return {
-    imageLink: t.string().required(),
+    imageLink: t.file().required(),
   };
 });

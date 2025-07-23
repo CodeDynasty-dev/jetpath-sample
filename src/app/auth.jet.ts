@@ -5,7 +5,7 @@ import { auth } from "../main.jet.ts";
 
 const client_redirect = process.env.client_redirect;
 
-export const POST_auth_user_login: JetRoute<{
+export const POST_auth_login: JetRoute<{
   body: { password: string; email: string };
 }> = async function (ctx) {
   const { email, password } = await ctx.parse();
@@ -24,7 +24,7 @@ export const POST_auth_user_login: JetRoute<{
   }
 };
 
-use(POST_auth_user_login).body((t) => ({
+use(POST_auth_login).body((t) => ({
   email: t
     .string({
       err: "invalid email, please recheck!",

@@ -5,7 +5,7 @@ import { throwingPlugin } from "../plugins.ts";
 
 const app = new Jetpath({
   apiDoc: {
-    name: "Sample API",
+    name: "Sample",
     info: "Sample API documentation",
     color: "#2563eb",
     // username: "admin",
@@ -51,4 +51,9 @@ export const MIDDLEWARE_: JetMiddleware = async function (ctx) {
 
 export const GET_: JetRoute<{ params: { "*": string } }> = (ctx) => {
   ctx.sendStream("src/site/index.html");
+};
+
+export const GET_uploads$0: JetRoute<{ params: { "*": string } }> = (ctx) => {
+  const file = ctx.params["*"];
+  ctx.sendStream(file, { folder: "src/site/" });
 };

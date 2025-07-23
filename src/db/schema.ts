@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import type { ICart, ICartItem, IProduct, IUser } from "./interfaces.ts"; // Make sure all relevant interfaces are imported
+import type { IUser } from "./interfaces.ts";
 
 // --- User Schema ---
 
@@ -30,7 +30,7 @@ const userSchema = new Schema<IUser>(
     role: {
       type: String,
       required: true,
-      enum: ["USER", "ADMIN", "SELLER"], // Standardized, added SELLER
+      enum: ["USER", "ADMIN"], // Standardized, added SELLER
       default: "USER",
       index: true,
     },
@@ -41,86 +41,12 @@ const userSchema = new Schema<IUser>(
       default: "PENDING_VERIFICATION",
       index: true,
     },
-    credit: { type: Number, required: true, default: 0, min: 0 },
     language: { type: String },
     currencyCode: { type: String },
     countryCode: { type: String },
     cityName: { type: String },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export const User = mongoose.model<IUser>("User", userSchema);
-
-const cartItemSchema = new Schema<ICartItem>(
-  {
-    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
-    variantId: { type: Schema.Types.ObjectId }, // Reference variant if applicable
-    quantity: { type: Number, required: true, min: 1 },
-    price: { type: Number, required: true, min: 0 }, // Store price to handle potential price changes
-    addedAt: { type: Date, default: Date.now },
-  },
-  { _id: false },
-);
-
-const cartSchema = new Schema<ICart>(
-  {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      unique: true,
-      index: true,
-    },
-    items: [cartItemSchema],
-    appliedCouponCode: { type: String, ref: "Coupon" },
-    discountAmount: { type: Number },
-  },
-  { timestamps: true }, // Tracks when the cart was last updated
-);
-
-export const Cart = mongoose.model<ICart>("Cart", cartSchema);
-
-// --- Product (Product) Schema ---
-
-const productSchema = new Schema<IProduct>(
-  {
-    title: { type: String, required: true, index: true },
-    imageLinks: { type: [String], required: true, default: [] }, // Ensure at least one image?
-    description: { type: String, required: true },
-    details: { type: String },
-    status: {
-      type: String,
-      required: true,
-      enum: ["ACTIVE", "INACTIVE", "DRAFT", "OUT_OF_STOCK", "ARCHIVED"], // Enhanced statuses
-      default: "DRAFT",
-      index: true,
-    },
-    stars: {
-      // Average rating
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5,
-      index: true,
-    },
-    price: { type: Number, required: true, min: 0, index: true },
-    userId: {
-      // Owner of the product (usually same as shop owner)
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-  },
-  { timestamps: true }, // Use both createdAt and updatedAt
-);
-
-// Text index for full-text search
-productSchema.index({ title: "text", description: "text" }); // Full-text search
-// Compound index for common filtering/sorting combinations
-productSchema.index({ categoryId: 1, price: 1 });
-productSchema.index({ status: 1, createdAt: -1 });
-productSchema.index({ status: 1, price: 1 });
-
-export const Product = mongoose.model<IProduct>("Product", productSchema);
