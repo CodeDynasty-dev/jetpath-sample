@@ -39,6 +39,7 @@ export const POST_auth_register: JetRoute<{
     language: string;
   };
 }> = async function (ctx) {
+
   const data = await ctx.parse();
   data.email = data.email.toLowerCase();
   data.password = await bcrypt.hash(data.password, 10);
@@ -75,6 +76,10 @@ use(POST_auth_register).body((t) => {
     cityName: t.string().default("New York"),
     currencyCode: t.string().default("USD"),
     language: t.string().default("English"),
+    to: t
+      .string()
+      .regex(/^\+[1-9]\d{1,14}$/)
+      .required(),
   };
 });
 

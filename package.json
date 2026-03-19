@@ -13,7 +13,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.6.1",
-    "jetpath": "^1.12.0",
+    "jetpath": "^1.12.1",
     "mongoose": "^8.16.4",
     "nanoid": "^5.1.5",
     "resend": "^4.7.0",

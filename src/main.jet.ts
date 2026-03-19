@@ -16,6 +16,13 @@ const app = new Jetpath({
   cors: true,
   strictMode: "ON",
   port: Number(process.env.PORT) || 3000,
+  globalHeaders: {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+    "Content-Type": "application/json",
+  },
 });
 app.derivePlugins(throwingPlugin);
 app.listen();
